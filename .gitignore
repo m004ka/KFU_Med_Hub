@@ -1,0 +1,120 @@
+# ========================
+# Java / Maven
+# ========================
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+*.rar
+!**/src/main/**/target/
+!**/src/test/**/target/
+hs_err_pid*
+replay_pid*
+
+# ========================
+# Spring Boot
+# ========================
+*.log
+logs/
+spring-shell.log
+
+# ========================
+# Frontend — Node.js
+# ========================
+node_modules/
+dist/
+build/
+.next/
+.nuxt/
+out/
+.cache/
+.parcel-cache/
+.vite/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# ========================
+# Environment & Secrets
+# ========================
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.jks
+
+# ========================
+# IntelliJ IDEA
+# ========================
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+.idea_modules/
+
+# ========================
+# VS Code
+# ========================
+.vscode/
+!.vscode/extensions.json
+
+# ========================
+# OS
+# ========================
+.DS_Store
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# ========================
+# Python (ML/Celery workers)
+# ========================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+eggs/
+.eggs/
+lib/
+lib64/
+sdist/
+wheels/
+.venv/
+venv/
+ENV/
+.python-version
+celerybeat-schedule
+celerybeat.pid
+.mypy_cache/
+.ruff_cache/
+
+# ========================
+# Docker / Kubernetes
+# ========================
+.docker/
+docker-compose.override.yml
+kubeconfig
+*.kubeconfig
+helm/charts/*.tgz
+
+# ========================
+# Misc
+# ========================
+*.swp
+*.swo
+*~

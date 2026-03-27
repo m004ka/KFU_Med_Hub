@@ -1,0 +1,78 @@
+:root {
+  --kfu-primary: #45688e;
+  --kfu-primary-dark: #2d4f6e;
+  --kfu-primary-light: #6b8faf;
+  --kfu-primary-bg: #eef2f7;
+  --kfu-bg: #f5f7fa;
+  --kfu-surface: #ffffff;
+  --kfu-text-primary: #1a2b3c;
+  --kfu-text-secondary: #6b7a8d;
+  --kfu-border: #d9e2ec;
+  --kfu-sidebar-width: 240px;
+  --kfu-sidebar-collapsed: 80px;
+  --kfu-header-height: 64px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--kfu-bg);
+  color: var(--kfu-text-primary);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--kfu-border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--kfu-primary-light);
+}
+
+/* Ant Design overrides */
+.ant-layout {
+  background: var(--kfu-bg) !important;
+}
+
+.ant-menu-dark {
+  background: var(--kfu-primary-dark) !important;
+}
+
+.ant-menu-dark .ant-menu-item-selected {
+  background-color: var(--kfu-primary) !important;
+}
+
+.ant-card {
+  border-radius: 10px !important;
+  border-color: var(--kfu-border) !important;
+}
+
+/* Page transitions */
+.page-enter {
+  opacity: 0;
+  transform: translateY(8px);
+}
+.page-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 200ms ease, transform 200ms ease;
+}

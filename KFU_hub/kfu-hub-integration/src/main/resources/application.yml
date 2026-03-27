@@ -1,0 +1,95 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: kfu-hub-integration
+
+  config:
+    import: "vault://secret/kfu-hub/integration"
+
+  cloud:
+    vault:
+      host: ${VAULT_HOST:localhost}
+      port: ${VAULT_PORT:8200}
+      scheme: http
+      authentication: TOKEN
+      token: ${VAULT_TOKEN}
+      kv:
+        enabled: true
+        backend: secret
+
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:kfu_hub}?currentSchema=integration
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: integration-pool
+      maximum-pool-size: 10
+      minimum-idle: 2
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: integration
+    show-sql: false
+    open-in-view: false
+
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    default-schema: integration
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
+    consumer:
+      group-id: kfu-hub-integration
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      auto-offset-reset: earliest
+      properties:
+        spring.json.trusted.packages: "ru.kfu.hub.*"
+
+fhir:
+  server-url: ${FHIR_SERVER_URL:http://localhost:8090/fhir}
+  version: R4
+  validate-resources: true
+  timeout-seconds: 30
+
+dicom:
+  wado-url: ${DICOM_WADO_URL:http://localhost:8080/wado}
+  stow-url: ${DICOM_STOW_URL:http://localhost:8080/stow}
+  qido-url: ${DICOM_QIDO_URL:http://localhost:8080/qido}
+  ae-title: ${DICOM_AE_TITLE:KFU_HUB}
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+logging:
+  level:
+    ru.kfu.hub: DEBUG
+    ca.uhn.fhir: INFO

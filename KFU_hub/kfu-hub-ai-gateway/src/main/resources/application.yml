@@ -1,0 +1,105 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: kfu-hub-ai-gateway
+
+  config:
+    import: "vault://secret/kfu-hub/ai-gateway"
+
+  cloud:
+    vault:
+      host: ${VAULT_HOST:localhost}
+      port: ${VAULT_PORT:8200}
+      scheme: http
+      authentication: TOKEN
+      token: ${VAULT_TOKEN}
+      kv:
+        enabled: true
+        backend: secret
+
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:kfu_hub}?currentSchema=ai_gateway
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: ai-gateway-pool
+      maximum-pool-size: 10
+      minimum-idle: 2
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: ai_gateway
+    show-sql: false
+    open-in-view: false
+
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    default-schema: ai_gateway
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD}
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
+    consumer:
+      group-id: kfu-hub-ai-gateway
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      auto-offset-reset: earliest
+      properties:
+        spring.json.trusted.packages: "ru.kfu.hub.*"
+
+ai:
+  triton:
+    url: ${TRITON_URL:http://localhost:8000}
+    grpc-port: ${TRITON_GRPC_PORT:8001}
+  huggingface:
+    api-url: ${HUGGINGFACE_API_URL:https://api-inference.huggingface.co}
+    api-token: ${HUGGINGFACE_API_TOKEN}
+  task:
+    timeout-seconds: 300
+    max-concurrent: 20
+
+kafka:
+  topics:
+    ai-task-submitted: kfu.hub.ai.task-submitted
+    ai-task-completed: kfu.hub.ai.task-completed
+    ai-task-failed: kfu.hub.ai.task-failed
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+logging:
+  level:
+    ru.kfu.hub: DEBUG

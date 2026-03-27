@@ -48,7 +48,6 @@ export default function LoginPage() {
       }}
     >
       <div style={{ width: '100%', maxWidth: 420 }}>
-        {/* Logo block */}
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
           <div
             style={{
@@ -78,7 +77,6 @@ export default function LoginPage() {
           </Text>
         </div>
 
-        {/* Card */}
         <div
           style={{
             background: '#fff',

@@ -36,7 +36,6 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         default_schema: audit
-        # Партиционирование — управляется через Liquibase, не Hibernate
         hbm2ddl.auto: validate
     show-sql: false
     open-in-view: false
@@ -52,7 +51,6 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       auto-offset-reset: earliest
-      # Отдельный consumer для каждого топика, чтобы не терять события
       enable-auto-commit: false
       properties:
         spring.json.trusted.packages: "ru.kfu.hub.*"
@@ -61,10 +59,8 @@ audit:
   retention-years: 3
   kafka:
     topics:
-      # Слушаем аудит-события от всех сервисов
       - kfu.hub.audit.event
   partition:
-    # Создавать партицию на каждый месяц (управляется через scheduled job)
     strategy: MONTHLY
 
 springdoc:

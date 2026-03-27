@@ -1,8 +1,5 @@
 services:
 
-  # ================================================================
-  # PostgreSQL 16
-  # ================================================================
   postgres:
     image: postgres:16-alpine
     container_name: kfu_hub_postgres
@@ -24,9 +21,6 @@ services:
     networks:
       - kfu_hub_net
 
-  # ================================================================
-  # Redis 7
-  # ================================================================
   redis:
     image: redis:7-alpine
     container_name: kfu_hub_redis
@@ -44,9 +38,6 @@ services:
     networks:
       - kfu_hub_net
 
-  # ================================================================
-  # Elasticsearch 8
-  # ================================================================
   elasticsearch:
     image: elasticsearch:8.13.4
     container_name: kfu_hub_elasticsearch
@@ -69,9 +60,6 @@ services:
     networks:
       - kfu_hub_net
 
-  # ================================================================
-  # Kibana (dev UI для Elasticsearch)
-  # ================================================================
   kibana:
     image: kibana:8.13.4
     container_name: kfu_hub_kibana
@@ -88,9 +76,6 @@ services:
     networks:
       - kfu_hub_net
 
-  # ================================================================
-  # MinIO (S3-совместимое объектное хранилище)
-  # ================================================================
   minio:
     image: minio/minio:latest
     container_name: kfu_hub_minio
@@ -112,26 +97,20 @@ services:
     networks:
       - kfu_hub_net
 
-  # ================================================================
-  # Apache Kafka 3.7 (KRaft — без Zookeeper)
-  # ================================================================
   kafka:
     image: bitnami/kafka:3.7
     container_name: kfu_hub_kafka
     restart: unless-stopped
     environment:
-      # KRaft mode
       KAFKA_CFG_NODE_ID: 1
       KAFKA_CFG_PROCESS_ROLES: broker,controller
       KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
       KAFKA_KRAFT_CLUSTER_ID: ${KAFKA_CLUSTER_ID}
-      # Listeners
       KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
       KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
       KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_CFG_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      # General
       KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
       KAFKA_CFG_LOG_RETENTION_HOURS: 168
     ports:
@@ -146,9 +125,6 @@ services:
     networks:
       - kfu_hub_net
 
-  # ================================================================
-  # Kafka UI (dev UI для Kafka)
-  # ================================================================
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     container_name: kfu_hub_kafka_ui
@@ -164,9 +140,7 @@ services:
     networks:
       - kfu_hub_net
 
-  # ================================================================
-  # HashiCorp Vault (секреты, credentials, ключи шифрования)
-  # ================================================================
+  # dev mode — данные не переживают рестарт, для прода нужен server mode с Raft
   vault:
     image: hashicorp/vault:1.17
     container_name: kfu_hub_vault
@@ -191,9 +165,6 @@ services:
     networks:
       - kfu_hub_net
 
-  # ================================================================
-  # Keycloak 24 (IAM / SSO)
-  # ================================================================
   keycloak:
     image: quay.io/keycloak/keycloak:24.0
     container_name: kfu_hub_keycloak
@@ -221,9 +192,6 @@ services:
     networks:
       - kfu_hub_net
 
-# ================================================================
-# Volumes
-# ================================================================
 volumes:
   postgres_data:
   redis_data:
@@ -232,9 +200,6 @@ volumes:
   kafka_data:
   vault_data:
 
-# ================================================================
-# Networks
-# ================================================================
 networks:
   kfu_hub_net:
     driver: bridge

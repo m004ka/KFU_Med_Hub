@@ -74,7 +74,6 @@ export default function Sidebar() {
         background: '#2d4f6e',
       }}
     >
-      {/* Logo */}
       <div
         style={{
           height: 64,
@@ -129,7 +128,6 @@ export default function Sidebar() {
         )}
       </div>
 
-      {/* Navigation */}
       <Menu
         theme="dark"
         mode="inline"

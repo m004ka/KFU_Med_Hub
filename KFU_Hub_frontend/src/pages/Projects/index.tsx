@@ -129,7 +129,6 @@ export default function ProjectsPage() {
         </Button>
       </div>
 
-      {/* Filters */}
       <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
         <Input
           prefix={<SearchOutlined style={{ color: '#9aa5b4' }} />}
@@ -175,7 +174,6 @@ export default function ProjectsPage() {
                   e.currentTarget.style.borderColor = '#d9e2ec'
                 }}
               >
-                {/* Header */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
                   <Tag
                     color={statusConfig[project.status].color}
@@ -189,7 +187,6 @@ export default function ProjectsPage() {
                   </Text>
                 </div>
 
-                {/* Title */}
                 <Title level={5} style={{ margin: '0 0 6px', color: '#1a2b3c', lineHeight: 1.3 }}>
                   {project.title}
                 </Title>
@@ -197,7 +194,6 @@ export default function ProjectsPage() {
                   {project.description}
                 </Text>
 
-                {/* Tags */}
                 <Space size={4} wrap style={{ marginBottom: 14 }}>
                   {project.tags.map((tag) => (
                     <Tag key={tag} style={{ fontSize: 11, borderRadius: 20, borderColor: '#d9e2ec', color: '#6b7a8d', background: '#f5f7fa', margin: 0 }}>
@@ -206,7 +202,6 @@ export default function ProjectsPage() {
                   ))}
                 </Space>
 
-                {/* Progress */}
                 <div style={{ marginBottom: 14 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
                     <Text style={{ fontSize: 11, color: '#6b7a8d' }}>
@@ -223,7 +218,6 @@ export default function ProjectsPage() {
                   />
                 </div>
 
-                {/* Footer */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Avatar.Group max={{ count: 3, style: { background: '#45688e', fontSize: 11 } as React.CSSProperties }} size={28}>
                     {project.members.map((m) => (

@@ -2,30 +2,25 @@ import type { ThemeConfig } from 'antd'
 
 const theme: ThemeConfig = {
   token: {
-    // Brand
     colorPrimary: '#45688e',
     colorPrimaryHover: '#6b8faf',
     colorPrimaryActive: '#2d4f6e',
     colorLink: '#45688e',
     colorLinkHover: '#6b8faf',
 
-    // Background
     colorBgBase: '#ffffff',
     colorBgContainer: '#ffffff',
     colorBgLayout: '#f5f7fa',
     colorBgElevated: '#ffffff',
 
-    // Text
     colorText: '#1a2b3c',
     colorTextSecondary: '#6b7a8d',
     colorTextTertiary: '#9aa5b4',
     colorTextQuaternary: '#c1cad5',
 
-    // Border
     colorBorder: '#d9e2ec',
     colorBorderSecondary: '#eef2f7',
 
-    // Font
     fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
     fontSize: 14,
     fontSizeLG: 16,
@@ -34,7 +29,6 @@ const theme: ThemeConfig = {
     fontSizeHeading2: 26,
     fontSizeHeading3: 20,
 
-    // Spacing & Shape
     borderRadius: 8,
     borderRadiusLG: 10,
     borderRadiusSM: 6,
@@ -42,15 +36,12 @@ const theme: ThemeConfig = {
     paddingLG: 24,
     paddingXL: 32,
 
-    // Shadows
     boxShadow: '0 1px 3px 0 rgba(0,0,0,.07), 0 1px 2px -1px rgba(0,0,0,.05)',
     boxShadowSecondary: '0 4px 6px -1px rgba(0,0,0,.07), 0 2px 4px -2px rgba(0,0,0,.05)',
 
-    // Motion
     motionDurationMid: '0.2s',
     motionDurationSlow: '0.3s',
 
-    // Control
     controlHeight: 38,
     controlHeightLG: 44,
   },

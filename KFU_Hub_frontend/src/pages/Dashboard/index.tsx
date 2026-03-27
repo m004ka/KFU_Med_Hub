@@ -115,7 +115,6 @@ export default function Dashboard() {
 
   return (
     <div style={{ maxWidth: 1400 }}>
-      {/* Header row */}
       <div style={{ marginBottom: 24 }}>
         <Title level={4} style={{ margin: 0, color: '#1a2b3c' }}>
           {greeting}, {user?.name?.split(' ')[0]} 👋
@@ -125,7 +124,6 @@ export default function Dashboard() {
         </Text>
       </div>
 
-      {/* Stats */}
       <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
         {statsData.map((stat) => (
           <Col xs={24} sm={12} lg={6} key={stat.title}>
@@ -174,7 +172,6 @@ export default function Dashboard() {
       </Row>
 
       <Row gutter={[16, 16]}>
-        {/* Recent activity */}
         <Col xs={24} xl={16}>
           <Card
             title={
@@ -200,9 +197,7 @@ export default function Dashboard() {
           </Card>
         </Col>
 
-        {/* Right column */}
         <Col xs={24} xl={8}>
-          {/* Active AI tasks */}
           <Card
             title={
               <Text strong style={{ fontSize: 14, color: '#1a2b3c' }}>
@@ -241,7 +236,6 @@ export default function Dashboard() {
             </Space>
           </Card>
 
-          {/* Quick actions */}
           <Card
             title={
               <Text strong style={{ fontSize: 14, color: '#1a2b3c' }}>

@@ -155,7 +155,6 @@ export default function DatasetsPage() {
         </Button>
       </div>
 
-      {/* Filters */}
       <Card style={{ borderRadius: 10, border: '1px solid #d9e2ec', marginBottom: 16 }} styles={{ body: { padding: 16 } }}>
         <Row gutter={12} align="middle">
           <Col flex="1">
@@ -195,7 +194,6 @@ export default function DatasetsPage() {
         </Row>
       </Card>
 
-      {/* Table */}
       <Card style={{ borderRadius: 10, border: '1px solid #d9e2ec' }} styles={{ body: { padding: 0 } }}>
         <Table
           dataSource={filtered}
@@ -205,7 +203,6 @@ export default function DatasetsPage() {
         />
       </Card>
 
-      {/* Upload modal */}
       <Modal
         title="Загрузить датасет"
         open={uploadOpen}

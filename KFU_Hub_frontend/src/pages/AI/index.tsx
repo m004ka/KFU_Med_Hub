@@ -125,7 +125,6 @@ export default function AIPage() {
       </div>
 
       <Row gutter={[16, 16]}>
-        {/* Launch panel */}
         <Col xs={24} xl={10}>
           <Card
             title={<Text strong style={{ fontSize: 14 }}>Новая задача</Text>}
@@ -249,7 +248,6 @@ export default function AIPage() {
           </Card>
         </Col>
 
-        {/* Jobs list */}
         <Col xs={24} xl={14}>
           <Card
             title={<Text strong style={{ fontSize: 14 }}>История задач</Text>}

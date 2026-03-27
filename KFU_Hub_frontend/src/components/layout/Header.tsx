@@ -80,12 +80,9 @@ export default function Header() {
         boxShadow: '0 1px 3px 0 rgba(0,0,0,.04)',
       }}
     >
-      {/* Left: breadcrumb area (empty for now) */}
       <div />
 
-      {/* Right: actions */}
       <Space size={4} align="center">
-        {/* Help */}
         <div
           style={{
             width: 36,
@@ -110,7 +107,6 @@ export default function Header() {
           <QuestionCircleOutlined style={{ fontSize: 17 }} />
         </div>
 
-        {/* Notifications */}
         <div
           style={{
             width: 36,
@@ -139,7 +135,6 @@ export default function Header() {
 
         <Divider type="vertical" style={{ margin: '0 4px', height: 20 }} />
 
-        {/* User */}
         <Dropdown menu={{ items: userMenuItems }} trigger={['click']} placement="bottomRight">
           <Space
             size={8}

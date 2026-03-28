@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="002-create-users-table" author="kfu-hub">
+        <createTable tableName="users" schemaName="auth" remarks="Пользователи платформы">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="username" type="VARCHAR(50)" remarks="Уникальное имя пользователя">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uq_users_username"/>
+            </column>
+            <column name="email" type="VARCHAR(255)" remarks="Email адрес">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uq_users_email"/>
+            </column>
+            <column name="password" type="VARCHAR(255)" remarks="Хэш пароля BCrypt">
+                <constraints nullable="false"/>
+            </column>
+            <column name="first_name" type="VARCHAR(100)" remarks="Имя"/>
+            <column name="last_name" type="VARCHAR(100)" remarks="Фамилия"/>
+            <column name="role" type="VARCHAR(20)" remarks="Роль: ADMIN, DOCTOR, TEACHER, STUDENT, RESEARCHER">
+                <constraints nullable="false"/>
+            </column>
+            <column name="enabled" type="BOOLEAN" defaultValueBoolean="true" remarks="Активна ли учётная запись">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP"/>
+            <column name="updated_at" type="TIMESTAMP"/>
+        </createTable>
+
+        <createIndex tableName="users" schemaName="auth" indexName="idx_users_email">
+            <column name="email"/>
+        </createIndex>
+
+        <rollback>
+            <dropTable tableName="users" schemaName="auth"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

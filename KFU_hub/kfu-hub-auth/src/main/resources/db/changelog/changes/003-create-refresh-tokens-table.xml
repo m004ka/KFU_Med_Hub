@@ -6,19 +6,19 @@
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
     <changeSet id="003-create-refresh-tokens-table" author="kfu-hub">
-        <createTable tableName="refresh_tokens" schemaName="auth" remarks="Refresh токены">
+        <createTable tableName="refresh_tokens" schemaName="auth">
             <column name="id" type="UUID">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="token" type="VARCHAR(512)" remarks="Значение refresh токена">
+            <column name="token" type="VARCHAR(512)">
                 <constraints nullable="false" unique="true" uniqueConstraintName="uq_refresh_tokens_token"/>
             </column>
-            <column name="user_id" type="UUID" remarks="Владелец токена">
+            <column name="user_id" type="UUID">
                 <constraints nullable="false"
                              foreignKeyName="fk_refresh_token_user"
                              references="auth.users(id)"/>
             </column>
-            <column name="expires_at" type="TIMESTAMP" remarks="Срок действия">
+            <column name="expires_at" type="TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
             <column name="created_at" type="TIMESTAMP"/>

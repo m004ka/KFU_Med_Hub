@@ -113,6 +113,9 @@ spring:
         jwt:
           issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8180/realms/kfu-hub}
 
+jwt:
+  secret: ${JWT_SECRET}
+
 resilience4j:
   circuitbreaker:
     configs:

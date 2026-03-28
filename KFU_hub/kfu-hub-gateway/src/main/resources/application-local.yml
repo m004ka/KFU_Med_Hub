@@ -74,6 +74,9 @@ spring:
       - org.springframework.boot.autoconfigure.security.reactive.ReactiveUserDetailsServiceAutoConfiguration
       - org.springframework.boot.actuate.autoconfigure.security.reactive.ReactiveManagementWebSecurityAutoConfiguration
 
+jwt:
+  secret: bG9jYWwtZGV2ZWxvcG1lbnQtc2VjcmV0LWtleS1mb3Ita2Z1LWh1Yi1tZWQtMjAyNg==
+
 logging:
   level:
     ru.kfu.hub: DEBUG

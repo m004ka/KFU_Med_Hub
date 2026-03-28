@@ -3,13 +3,33 @@ spring:
     vault:
       enabled: false
 
+  datasource:
+    url: jdbc:h2:mem:audit_db;DB_CLOSE_DELAY=-1;INIT=CREATE SCHEMA IF NOT EXISTS AUDIT;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: true
+    properties:
+      hibernate:
+        default_schema: audit
+
+  liquibase:
+    enabled: true
+    default-schema: audit
+    liquibase-schema: public
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
   autoconfigure:
     exclude:
-      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
-      - org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration
-      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
-      - org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration
-      - org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration
       - org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
       - org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration
       - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
@@ -19,3 +39,4 @@ spring:
 logging:
   level:
     ru.kfu.hub: DEBUG
+    liquibase: INFO

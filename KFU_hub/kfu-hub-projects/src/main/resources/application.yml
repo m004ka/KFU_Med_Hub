@@ -6,7 +6,7 @@ spring:
     name: kfu-hub-projects
 
   config:
-    import: "vault://secret/kfu-hub/projects"
+    import: "optional:vault://secret/kfu-hub/projects"
 
   cloud:
     vault:

@@ -6,7 +6,7 @@ spring:
     name: kfu-hub-dataset
 
   config:
-    import: "vault://secret/kfu-hub/dataset"
+    import: "optional:vault://secret/kfu-hub/dataset"
 
   cloud:
     vault:

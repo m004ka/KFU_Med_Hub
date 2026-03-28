@@ -6,7 +6,7 @@ spring:
     name: kfu-hub-notifications
 
   config:
-    import: "vault://secret/kfu-hub/notifications"
+    import: "optional:vault://secret/kfu-hub/notifications"
 
   cloud:
     vault:

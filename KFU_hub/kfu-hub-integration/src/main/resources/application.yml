@@ -6,7 +6,7 @@ spring:
     name: kfu-hub-integration
 
   config:
-    import: "vault://secret/kfu-hub/integration"
+    import: "optional:vault://secret/kfu-hub/integration"
 
   cloud:
     vault:

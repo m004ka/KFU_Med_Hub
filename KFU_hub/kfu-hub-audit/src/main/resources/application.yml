@@ -6,7 +6,7 @@ spring:
     name: kfu-hub-audit
 
   config:
-    import: "vault://secret/kfu-hub/audit"
+    import: "optional:vault://secret/kfu-hub/audit"
 
   cloud:
     vault:

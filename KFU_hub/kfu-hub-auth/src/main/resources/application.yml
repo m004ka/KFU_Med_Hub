@@ -6,7 +6,7 @@ spring:
     name: kfu-hub-auth
 
   config:
-    import: "vault://secret/kfu-hub/auth"
+    import: "optional:vault://secret/kfu-hub/auth"
 
   cloud:
     vault:

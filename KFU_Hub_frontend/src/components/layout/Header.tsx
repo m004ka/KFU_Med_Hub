@@ -8,7 +8,9 @@ import {
 } from '@ant-design/icons'
 import type { MenuProps } from 'antd'
 import { useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { useAuthStore } from '@/store/authStore'
+import { notificationsApi } from '@/api/notifications'
 
 const { Header: AntHeader } = Layout
 const { Text } = Typography
@@ -32,6 +34,12 @@ const roleColors: Record<string, string> = {
 export default function Header() {
   const navigate = useNavigate()
   const { user, logout } = useAuthStore()
+
+  const { data: unreadData } = useQuery({
+    queryKey: ['notifications', 'unread-count'],
+    queryFn: notificationsApi.getUnreadCount,
+    refetchInterval: 30_000,
+  })
 
   const userMenuItems: MenuProps['items'] = [
     {
@@ -128,7 +136,7 @@ export default function Header() {
             e.currentTarget.style.color = '#6b7a8d'
           }}
         >
-          <Badge count={3} size="small" offset={[-2, 2]}>
+          <Badge count={unreadData?.count ?? 0} size="small" offset={[-2, 2]}>
             <BellOutlined style={{ fontSize: 17 }} />
           </Badge>
         </div>

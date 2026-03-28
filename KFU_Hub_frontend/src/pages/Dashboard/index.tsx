@@ -3,112 +3,73 @@ import {
   DatabaseOutlined,
   ExperimentOutlined,
   TeamOutlined,
-  FileSearchOutlined,
+  AuditOutlined,
   ArrowUpOutlined,
   RightOutlined,
 } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { useAuthStore } from '@/store/authStore'
+import { datasetsApi } from '@/api/datasets'
+import { projectsApi } from '@/api/projects'
+import { aiApi } from '@/api/ai'
+import { auditApi } from '@/api/audit'
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
+import 'dayjs/locale/ru'
+dayjs.extend(relativeTime)
+dayjs.locale('ru')
 
 const { Title, Text } = Typography
-
-const statsData = [
-  {
-    title: 'Датасетов',
-    value: 47,
-    suffix: 'шт',
-    icon: <DatabaseOutlined />,
-    color: '#45688e',
-    bg: '#eef2f7',
-    trend: '+3 за месяц',
-  },
-  {
-    title: 'ИИ-задач запущено',
-    value: 182,
-    suffix: '',
-    icon: <ExperimentOutlined />,
-    color: '#722ed1',
-    bg: '#f9f0ff',
-    trend: '+24 за неделю',
-  },
-  {
-    title: 'Активных проектов',
-    value: 12,
-    suffix: '',
-    icon: <TeamOutlined />,
-    color: '#52c41a',
-    bg: '#f6ffed',
-    trend: '3 новых',
-  },
-  {
-    title: 'Пользователей',
-    value: 134,
-    suffix: '',
-    icon: <FileSearchOutlined />,
-    color: '#fa8c16',
-    bg: '#fff7e6',
-    trend: '+11 за месяц',
-  },
-]
-
-const recentActivity = [
-  { key: 1, user: 'Иванова М.С.', action: 'Загрузила датасет', object: 'lab_results_2026_q1.csv', time: '5 мин назад', status: 'success' },
-  { key: 2, user: 'Петров А.Н.', action: 'Запустил ИИ-анализ', object: 'Классификация МКБ-11', time: '18 мин назад', status: 'processing' },
-  { key: 3, user: 'Сидорова Е.В.', action: 'Создала проект', object: 'Анализ лёгочных патологий', time: '1 ч назад', status: 'success' },
-  { key: 4, user: 'Ахметов Р.И.', action: 'Добавил участника', object: 'Предиктивная аналитика', time: '2 ч назад', status: 'success' },
-  { key: 5, user: 'Козлова Т.П.', action: 'ИИ-анализ завершён', object: 'Рентгеновские снимки Q1', time: '3 ч назад', status: 'success' },
-]
 
 const activityColumns = [
   {
     title: 'Пользователь',
-    dataIndex: 'user',
+    dataIndex: 'userName',
     render: (name: string) => (
       <Space>
         <Avatar size={28} style={{ background: '#45688e', fontSize: 11, fontWeight: 600 }}>
-          {name.charAt(0)}
+          {(name ?? '?').charAt(0)}
         </Avatar>
-        <Text style={{ fontSize: 13 }}>{name}</Text>
+        <Text style={{ fontSize: 13 }}>{name ?? '—'}</Text>
       </Space>
     ),
   },
   {
     title: 'Действие',
     dataIndex: 'action',
-    render: (action: string) => <Text style={{ fontSize: 13, color: '#6b7a8d' }}>{action}</Text>,
+    render: (action: string) => <Tag color="blue" style={{ borderRadius: 20, fontSize: 11 }}>{action}</Tag>,
   },
   {
     title: 'Объект',
-    dataIndex: 'object',
-    render: (obj: string) => (
-      <Text style={{ fontSize: 13, color: '#45688e', fontWeight: 500 }}>{obj}</Text>
-    ),
-  },
-  {
-    title: 'Статус',
-    dataIndex: 'status',
-    render: (s: string) => (
-      <Tag color={s === 'processing' ? 'blue' : 'green'} style={{ borderRadius: 20, fontSize: 11 }}>
-        {s === 'processing' ? 'В процессе' : 'Выполнено'}
-      </Tag>
+    dataIndex: 'entityType',
+    render: (t: string, row: any) => (
+      <Text style={{ fontSize: 12, color: '#45688e', fontWeight: 500 }}>{t}{row.entityId ? ` #${row.entityId.slice(0, 8)}` : ''}</Text>
     ),
   },
   {
     title: 'Время',
-    dataIndex: 'time',
-    render: (t: string) => <Text style={{ fontSize: 12, color: '#9aa5b4' }}>{t}</Text>,
+    dataIndex: 'createdAt',
+    render: (t: string) => <Text style={{ fontSize: 12, color: '#9aa5b4' }}>{t ? dayjs(t).fromNow() : '—'}</Text>,
   },
-]
-
-const aiTasks = [
-  { name: 'Классификация МКБ-11', progress: 67, color: '#45688e' },
-  { name: 'Анализ рентген-снимков', progress: 100, color: '#52c41a' },
-  { name: 'NLP историй болезней', progress: 23, color: '#722ed1' },
 ]
 
 export default function Dashboard() {
   const navigate = useNavigate()
   const user = useAuthStore((s) => s.user)
+
+  const { data: datasetsData } = useQuery({ queryKey: ['datasets-count'], queryFn: () => datasetsApi.list({ page: 0, size: 1 }) })
+  const { data: projectsData } = useQuery({ queryKey: ['projects-count'], queryFn: () => projectsApi.list({ page: 0, size: 1 }) })
+  const { data: aiData } = useQuery({ queryKey: ['ai-tasks-count'], queryFn: () => aiApi.list({ page: 0, size: 1 }) })
+  const { data: auditData } = useQuery({ queryKey: ['audit-recent'], queryFn: () => auditApi.list({ page: 0, size: 5 }) })
+  const { data: runningAi } = useQuery({ queryKey: ['ai-running'], queryFn: () => aiApi.list({ page: 0, size: 5, status: 'RUNNING' }), refetchInterval: 5_000 })
+
+  const statsData = [
+    { title: 'Датасетов', value: datasetsData?.totalElements ?? 0, icon: <DatabaseOutlined />, color: '#45688e', bg: '#eef2f7', trend: 'всего в системе' },
+    { title: 'ИИ-задач запущено', value: aiData?.totalElements ?? 0, icon: <ExperimentOutlined />, color: '#722ed1', bg: '#f9f0ff', trend: 'всего в системе' },
+    { title: 'Активных проектов', value: projectsData?.totalElements ?? 0, icon: <TeamOutlined />, color: '#52c41a', bg: '#f6ffed', trend: 'всего в системе' },
+    { title: 'Записей аудита', value: auditData?.totalElements ?? 0, icon: <AuditOutlined />, color: '#fa8c16', bg: '#fff7e6', trend: 'всего в системе' },
+  ]
 
   const hour = new Date().getHours()
   const greeting = hour < 12 ? 'Доброе утро' : hour < 18 ? 'Добрый день' : 'Добрый вечер'
@@ -143,7 +104,6 @@ export default function Dashboard() {
                     </Text>
                   }
                   value={stat.value}
-                  suffix={stat.suffix}
                   valueStyle={{ fontSize: 28, fontWeight: 700, color: '#1a2b3c', lineHeight: 1.2 }}
                 />
                 <div
@@ -188,7 +148,8 @@ export default function Dashboard() {
             styles={{ body: { padding: 0 } }}
           >
             <Table
-              dataSource={recentActivity}
+              dataSource={auditData?.content ?? []}
+              rowKey="id"
               columns={activityColumns}
               pagination={false}
               size="small"
@@ -217,15 +178,17 @@ export default function Dashboard() {
             style={{ borderRadius: 10, border: '1px solid #d9e2ec', marginBottom: 16 }}
           >
             <Space direction="vertical" style={{ width: '100%' }} size={16}>
-              {aiTasks.map((task) => (
-                <div key={task.name}>
+              {(runningAi?.content ?? []).length === 0 ? (
+                <Text style={{ fontSize: 13, color: '#9aa5b4' }}>Нет активных задач</Text>
+              ) : (runningAi?.content ?? []).map((task) => (
+                <div key={task.id}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
                     <Text style={{ fontSize: 12, color: '#1a2b3c' }}>{task.name}</Text>
-                    <Text style={{ fontSize: 12, color: '#6b7a8d' }}>{task.progress}%</Text>
+                    <Text style={{ fontSize: 12, color: '#6b7a8d' }}>{task.progress ?? 0}%</Text>
                   </div>
                   <Progress
-                    percent={task.progress}
-                    strokeColor={task.color}
+                    percent={task.progress ?? 0}
+                    strokeColor="#45688e"
                     trailColor="#eef2f7"
                     showInfo={false}
                     size={['100%', 6]}

@@ -1,140 +1,213 @@
 import {
   Card, Input, Table, Tag, Button, Space, Typography,
-  Select, Row, Col, Tooltip, Upload, Modal, Form, Divider,
+  Select, Row, Col, Tooltip, Upload, Modal, Form, Divider, message,
 } from 'antd'
 import {
   SearchOutlined, UploadOutlined, DownloadOutlined,
   EyeOutlined, FilterOutlined, PlusOutlined,
 } from '@ant-design/icons'
 import { useState } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { datasetsApi, type Dataset, type DatasetType } from '@/api/datasets'
+import dayjs from 'dayjs'
 
 const { Title, Text } = Typography
 
-type DatasetFormat = 'CSV' | 'JSON' | 'XLSX' | 'DICOM' | 'NIFTI' | 'FHIR' | 'Parquet'
-type AccessLevel = 'public' | 'group' | 'private'
-
-interface Dataset {
-  key: number
-  name: string
-  description: string
-  format: DatasetFormat
-  size: string
-  records: number
-  tags: string[]
-  access: AccessLevel
-  owner: string
-  updated: string
+const typeColors: Record<DatasetType, string> = {
+  CLINICAL: 'green',
+  GENOMIC: 'purple',
+  IMAGING: 'volcano',
+  LAB: 'cyan',
+  OTHER: 'default',
 }
 
-const mockData: Dataset[] = [
-  { key: 1, name: 'lab_results_2025_q4', description: 'Результаты лаб. анализов 4 кв. 2025', format: 'CSV', size: '12 МБ', records: 45820, tags: ['лаборатория', 'анализы'], access: 'group', owner: 'Иванова М.С.', updated: '12.03.2026' },
-  { key: 2, name: 'chest_xray_dataset_v2', description: 'Рентгеновские снимки грудной клетки', format: 'DICOM', size: '4.2 ГБ', records: 1240, tags: ['рентген', 'лёгкие', 'DICOM'], access: 'private', owner: 'Петров А.Н.', updated: '08.03.2026' },
-  { key: 3, name: 'patient_records_fhir', description: 'Истории болезней в формате HL7 FHIR R4', format: 'FHIR', size: '890 МБ', records: 9800, tags: ['FHIR', 'истории болезней'], access: 'private', owner: 'Сидорова Е.В.', updated: '01.03.2026' },
-  { key: 4, name: 'blood_pressure_monitoring', description: 'Мониторинг АД за 2024 год', format: 'CSV', size: '3 МБ', records: 120000, tags: ['кардиология', 'мониторинг'], access: 'public', owner: 'Козлова Т.П.', updated: '25.02.2026' },
-  { key: 5, name: 'mri_brain_segmentation', description: 'МРТ снимки головного мозга для сегментации', format: 'NIFTI', size: '18 ГБ', records: 340, tags: ['МРТ', 'нейрология', 'сегментация'], access: 'group', owner: 'Ахметов Р.И.', updated: '20.02.2026' },
-]
-
-const formatColors: Record<DatasetFormat, string> = {
-  CSV: 'green', JSON: 'blue', XLSX: 'cyan',
-  DICOM: 'volcano', NIFTI: 'purple', FHIR: 'geekblue', Parquet: 'orange',
+const typeLabels: Record<DatasetType, string> = {
+  CLINICAL: 'Клинический',
+  GENOMIC: 'Геномный',
+  IMAGING: 'Изображения',
+  LAB: 'Лаборатория',
+  OTHER: 'Другое',
 }
 
-const accessLabels: Record<AccessLevel, { label: string; color: string }> = {
-  public: { label: 'Публичный', color: 'green' },
-  group: { label: 'Группа', color: 'blue' },
-  private: { label: 'Приватный', color: 'default' },
+const statusColors: Record<string, string> = {
+  DRAFT: 'orange',
+  PUBLISHED: 'green',
+  ARCHIVED: 'default',
 }
 
-const columns = [
-  {
-    title: 'Название',
-    dataIndex: 'name',
-    render: (name: string, row: Dataset) => (
-      <div>
-        <Text strong style={{ fontSize: 13, color: '#1a2b3c', fontFamily: 'monospace' }}>{name}</Text>
-        <br />
-        <Text style={{ fontSize: 12, color: '#6b7a8d' }}>{row.description}</Text>
-      </div>
-    ),
-  },
-  {
-    title: 'Формат',
-    dataIndex: 'format',
-    width: 90,
-    render: (f: DatasetFormat) => <Tag color={formatColors[f]} style={{ borderRadius: 20, fontSize: 11 }}>{f}</Tag>,
-  },
-  {
-    title: 'Размер / Записей',
-    dataIndex: 'size',
-    width: 140,
-    render: (size: string, row: Dataset) => (
-      <div>
-        <Text style={{ fontSize: 13 }}>{size}</Text>
-        <br />
-        <Text style={{ fontSize: 11, color: '#9aa5b4' }}>{row.records.toLocaleString('ru')} записей</Text>
-      </div>
-    ),
-  },
-  {
-    title: 'Теги',
-    dataIndex: 'tags',
-    render: (tags: string[]) => (
-      <Space size={4} wrap>
-        {tags.map((t) => (
-          <Tag key={t} style={{ borderRadius: 20, fontSize: 11, borderColor: '#d9e2ec', color: '#6b7a8d', background: '#f5f7fa' }}>{t}</Tag>
-        ))}
-      </Space>
-    ),
-  },
-  {
-    title: 'Доступ',
-    dataIndex: 'access',
-    width: 110,
-    render: (a: AccessLevel) => (
-      <Tag color={accessLabels[a].color} style={{ borderRadius: 20, fontSize: 11 }}>
-        {accessLabels[a].label}
-      </Tag>
-    ),
-  },
-  {
-    title: 'Владелец',
-    dataIndex: 'owner',
-    width: 150,
-    render: (o: string) => <Text style={{ fontSize: 12, color: '#6b7a8d' }}>{o}</Text>,
-  },
-  {
-    title: 'Обновлён',
-    dataIndex: 'updated',
-    width: 110,
-    render: (d: string) => <Text style={{ fontSize: 12, color: '#9aa5b4' }}>{d}</Text>,
-  },
-  {
-    title: '',
-    key: 'actions',
-    width: 100,
-    render: () => (
-      <Space>
-        <Tooltip title="Просмотр">
-          <Button size="small" icon={<EyeOutlined />} style={{ border: 'none', color: '#45688e', background: '#eef2f7' }} />
-        </Tooltip>
-        <Tooltip title="Скачать">
-          <Button size="small" icon={<DownloadOutlined />} style={{ border: 'none', color: '#6b7a8d', background: '#f5f7fa' }} />
-        </Tooltip>
-      </Space>
-    ),
-  },
-]
+const statusLabels: Record<string, string> = {
+  DRAFT: 'Черновик',
+  PUBLISHED: 'Опубликован',
+  ARCHIVED: 'Архив',
+}
+
+function formatBytes(bytes: number) {
+  if (!bytes) return '—'
+  if (bytes < 1024) return `${bytes} Б`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} КБ`
+  if (bytes < 1024 * 1024 * 1024) return `${(bytes / 1024 / 1024).toFixed(1)} МБ`
+  return `${(bytes / 1024 / 1024 / 1024).toFixed(2)} ГБ`
+}
 
 export default function DatasetsPage() {
+  const queryClient = useQueryClient()
   const [uploadOpen, setUploadOpen] = useState(false)
+  const [createOpen, setCreateOpen] = useState(false)
   const [search, setSearch] = useState('')
+  const [page, setPage] = useState(1)
+  const [statusFilter, setStatusFilter] = useState<string | undefined>()
+  const [typeFilter, setTypeFilter] = useState<DatasetType | undefined>()
+  const [form] = Form.useForm()
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [createdId, setCreatedId] = useState<string | null>(null)
 
-  const filtered = mockData.filter(
-    (d) =>
-      d.name.toLowerCase().includes(search.toLowerCase()) ||
-      d.description.toLowerCase().includes(search.toLowerCase()) ||
-      d.tags.some((t) => t.toLowerCase().includes(search.toLowerCase()))
-  )
+  const { data, isLoading } = useQuery({
+    queryKey: ['datasets', page, statusFilter, typeFilter],
+    queryFn: () =>
+      datasetsApi.list({
+        page: page - 1,
+        size: 10,
+        status: statusFilter as any,
+        type: typeFilter,
+      }),
+  })
+
+  const createMutation = useMutation({
+    mutationFn: datasetsApi.create,
+    onSuccess: (ds) => {
+      setCreatedId(ds.id)
+      setCreateOpen(false)
+      setUploadOpen(true)
+      form.resetFields()
+    },
+    onError: () => message.error('Не удалось создать датасет'),
+  })
+
+  const uploadMutation = useMutation({
+    mutationFn: ({ id, file }: { id: string; file: File }) =>
+      datasetsApi.upload(id, file),
+    onSuccess: () => {
+      message.success('Файл загружен')
+      setUploadOpen(false)
+      setCreatedId(null)
+      setSelectedFile(null)
+      queryClient.invalidateQueries({ queryKey: ['datasets'] })
+    },
+    onError: () => message.error('Ошибка загрузки файла'),
+  })
+
+  const handleCreate = (values: any) => {
+    createMutation.mutate({
+      name: values.name,
+      description: values.description,
+      type: values.type,
+      tags: values.tags ?? [],
+    })
+  }
+
+  const handleUpload = () => {
+    if (!createdId || !selectedFile) return
+    uploadMutation.mutate({ id: createdId, file: selectedFile })
+  }
+
+  const filtered = (data?.content ?? []).filter((d) => {
+    if (!search) return true
+    const s = search.toLowerCase()
+    return (
+      d.name.toLowerCase().includes(s) ||
+      (d.description ?? '').toLowerCase().includes(s) ||
+      (d.tags ?? []).some((t) => t.toLowerCase().includes(s))
+    )
+  })
+
+  const columns = [
+    {
+      title: 'Название',
+      dataIndex: 'name',
+      render: (name: string, row: Dataset) => (
+        <div>
+          <Text strong style={{ fontSize: 13, color: '#1a2b3c', fontFamily: 'monospace' }}>{name}</Text>
+          <br />
+          <Text style={{ fontSize: 12, color: '#6b7a8d' }}>{row.description}</Text>
+        </div>
+      ),
+    },
+    {
+      title: 'Тип',
+      dataIndex: 'type',
+      width: 130,
+      render: (t: DatasetType) => (
+        <Tag color={typeColors[t] ?? 'default'} style={{ borderRadius: 20, fontSize: 11 }}>
+          {typeLabels[t] ?? t}
+        </Tag>
+      ),
+    },
+    {
+      title: 'Статус',
+      dataIndex: 'status',
+      width: 120,
+      render: (s: string) => (
+        <Tag color={statusColors[s] ?? 'default'} style={{ borderRadius: 20, fontSize: 11 }}>
+          {statusLabels[s] ?? s}
+        </Tag>
+      ),
+    },
+    {
+      title: 'Размер / Записей',
+      dataIndex: 'fileSize',
+      width: 140,
+      render: (size: number, row: Dataset) => (
+        <div>
+          <Text style={{ fontSize: 13 }}>{formatBytes(size)}</Text>
+          <br />
+          <Text style={{ fontSize: 11, color: '#9aa5b4' }}>{row.recordCount?.toLocaleString('ru') ?? '—'} записей</Text>
+        </div>
+      ),
+    },
+    {
+      title: 'Теги',
+      dataIndex: 'tags',
+      render: (tags: string[]) => (
+        <Space size={4} wrap>
+          {(tags ?? []).map((t) => (
+            <Tag key={t} style={{ borderRadius: 20, fontSize: 11, borderColor: '#d9e2ec', color: '#6b7a8d', background: '#f5f7fa' }}>{t}</Tag>
+          ))}
+        </Space>
+      ),
+    },
+    {
+      title: 'Владелец',
+      dataIndex: 'ownerName',
+      width: 150,
+      render: (o: string) => <Text style={{ fontSize: 12, color: '#6b7a8d' }}>{o}</Text>,
+    },
+    {
+      title: 'Обновлён',
+      dataIndex: 'updatedAt',
+      width: 110,
+      render: (d: string) => <Text style={{ fontSize: 12, color: '#9aa5b4' }}>{d ? dayjs(d).format('DD.MM.YYYY') : '—'}</Text>,
+    },
+    {
+      title: '',
+      key: 'actions',
+      width: 100,
+      render: (_: any, row: Dataset) => (
+        <Space>
+          <Tooltip title="Просмотр">
+            <Button size="small" icon={<EyeOutlined />} style={{ border: 'none', color: '#45688e', background: '#eef2f7' }} />
+          </Tooltip>
+          <Tooltip title="Скачать">
+            <Button
+              size="small"
+              icon={<DownloadOutlined />}
+              style={{ border: 'none', color: '#6b7a8d', background: '#f5f7fa' }}
+              onClick={() => datasetsApi.getDownloadUrl(row.id).then((r) => window.open(r.url, '_blank'))}
+            />
+          </Tooltip>
+        </Space>
+      ),
+    },
+  ]
 
   return (
     <div style={{ maxWidth: 1400 }}>
@@ -148,7 +221,7 @@ export default function DatasetsPage() {
         <Button
           type="primary"
           icon={<PlusOutlined />}
-          onClick={() => setUploadOpen(true)}
+          onClick={() => setCreateOpen(true)}
           style={{ height: 38, fontWeight: 500 }}
         >
           Загрузить датасет
@@ -168,22 +241,22 @@ export default function DatasetsPage() {
           </Col>
           <Col>
             <Select
-              placeholder="Формат"
+              placeholder="Тип"
               allowClear
-              style={{ width: 140 }}
-              options={['CSV', 'JSON', 'DICOM', 'NIFTI', 'FHIR', 'XLSX', 'Parquet'].map((f) => ({ label: f, value: f }))}
+              style={{ width: 150 }}
+              value={typeFilter}
+              onChange={(v) => { setTypeFilter(v); setPage(1) }}
+              options={Object.entries(typeLabels).map(([v, l]) => ({ label: l, value: v }))}
             />
           </Col>
           <Col>
             <Select
-              placeholder="Доступ"
+              placeholder="Статус"
               allowClear
               style={{ width: 140 }}
-              options={[
-                { label: 'Публичный', value: 'public' },
-                { label: 'Группа', value: 'group' },
-                { label: 'Приватный', value: 'private' },
-              ]}
+              value={statusFilter}
+              onChange={(v) => { setStatusFilter(v); setPage(1) }}
+              options={Object.entries(statusLabels).map(([v, l]) => ({ label: l, value: v }))}
             />
           </Col>
           <Col>
@@ -197,21 +270,30 @@ export default function DatasetsPage() {
       <Card style={{ borderRadius: 10, border: '1px solid #d9e2ec' }} styles={{ body: { padding: 0 } }}>
         <Table
           dataSource={filtered}
+          rowKey="id"
           columns={columns}
-          pagination={{ pageSize: 10, showSizeChanger: true, showTotal: (total) => `Всего ${total} датасетов` }}
+          loading={isLoading}
+          pagination={{
+            current: page,
+            pageSize: 10,
+            total: data?.totalElements ?? 0,
+            onChange: setPage,
+            showSizeChanger: false,
+            showTotal: (total) => `Всего ${total} датасетов`,
+          }}
           size="middle"
         />
       </Card>
 
+      {/* Создание датасета */}
       <Modal
-        title="Загрузить датасет"
-        open={uploadOpen}
-        onCancel={() => setUploadOpen(false)}
+        title="Новый датасет"
+        open={createOpen}
+        onCancel={() => setCreateOpen(false)}
         footer={null}
         width={520}
-        styles={{ body: { paddingTop: 8 } }}
       >
-        <Form layout="vertical" requiredMark={false}>
+        <Form layout="vertical" requiredMark={false} form={form} onFinish={handleCreate}>
           <Form.Item label="Название" name="name" rules={[{ required: true }]}>
             <Input placeholder="Уникальное название датасета" />
           </Form.Item>
@@ -220,12 +302,10 @@ export default function DatasetsPage() {
           </Form.Item>
           <Row gutter={12}>
             <Col span={12}>
-              <Form.Item label="Уровень доступа" name="access">
-                <Select defaultValue="private" options={[
-                  { label: 'Приватный', value: 'private' },
-                  { label: 'Группа', value: 'group' },
-                  { label: 'Публичный', value: 'public' },
-                ]} />
+              <Form.Item label="Тип" name="type" rules={[{ required: true }]}>
+                <Select
+                  options={Object.entries(typeLabels).map(([v, l]) => ({ label: l, value: v }))}
+                />
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -234,22 +314,48 @@ export default function DatasetsPage() {
               </Form.Item>
             </Col>
           </Row>
-          <Divider style={{ margin: '8px 0 16px' }} />
-          <Upload.Dragger
-            maxCount={1}
-            style={{ borderColor: '#d9e2ec', borderRadius: 8, background: '#f5f7fa' }}
-          >
-            <p style={{ fontSize: 28, color: '#45688e', marginBottom: 8 }}>
-              <UploadOutlined />
-            </p>
-            <p style={{ fontSize: 13, color: '#1a2b3c', fontWeight: 500 }}>Перетащите файл или нажмите для выбора</p>
-            <p style={{ fontSize: 12, color: '#9aa5b4' }}>CSV, JSON, XLSX, DICOM, NIFTI, FHIR Bundle, Parquet · до 5 ГБ</p>
-          </Upload.Dragger>
-          <div style={{ marginTop: 16, display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-            <Button onClick={() => setUploadOpen(false)}>Отмена</Button>
-            <Button type="primary">Загрузить</Button>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+            <Button onClick={() => setCreateOpen(false)}>Отмена</Button>
+            <Button type="primary" htmlType="submit" loading={createMutation.isPending}>
+              Создать
+            </Button>
           </div>
         </Form>
+      </Modal>
+
+      {/* Загрузка файла */}
+      <Modal
+        title="Загрузить файл"
+        open={uploadOpen}
+        onCancel={() => { setUploadOpen(false); setCreatedId(null); setSelectedFile(null) }}
+        footer={null}
+        width={520}
+      >
+        <Divider style={{ margin: '8px 0 16px' }} />
+        <Upload.Dragger
+          maxCount={1}
+          beforeUpload={(file) => { setSelectedFile(file); return false }}
+          style={{ borderColor: '#d9e2ec', borderRadius: 8, background: '#f5f7fa' }}
+        >
+          <p style={{ fontSize: 28, color: '#45688e', marginBottom: 8 }}>
+            <UploadOutlined />
+          </p>
+          <p style={{ fontSize: 13, color: '#1a2b3c', fontWeight: 500 }}>Перетащите файл или нажмите для выбора</p>
+          <p style={{ fontSize: 12, color: '#9aa5b4' }}>CSV, JSON, XLSX, DICOM, NIFTI, FHIR Bundle, Parquet · до 5 ГБ</p>
+        </Upload.Dragger>
+        <div style={{ marginTop: 16, display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+          <Button onClick={() => { setUploadOpen(false); queryClient.invalidateQueries({ queryKey: ['datasets'] }) }}>
+            Пропустить
+          </Button>
+          <Button
+            type="primary"
+            disabled={!selectedFile}
+            loading={uploadMutation.isPending}
+            onClick={handleUpload}
+          >
+            Загрузить
+          </Button>
+        </div>
       </Modal>
     </div>
   )

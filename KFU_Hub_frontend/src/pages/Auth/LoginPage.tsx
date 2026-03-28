@@ -3,6 +3,7 @@ import { UserOutlined, LockOutlined } from '@ant-design/icons'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
+import { authApi } from '@/api/auth'
 
 const { Title, Text, Link } = Typography
 
@@ -16,21 +17,19 @@ export default function LoginPage() {
     setLoading(true)
     setError(null)
     try {
-      // TODO: replace with real API call
-      await new Promise((r) => setTimeout(r, 800))
+      const data = await authApi.login({ username: values.email, password: values.password })
       setAuth(
         {
-          id: '1',
-          name: 'Юсупов Радмир',
-          email: values.email,
-          role: 'ADMIN',
-          department: 'Медицинская санчасть',
+          id: data.userId,
+          name: data.username,
+          email: data.username,
+          role: data.role as any,
         },
-        'mock-token'
+        data.accessToken
       )
       navigate('/dashboard')
-    } catch {
-      setError('Неверный логин или пароль')
+    } catch (err: any) {
+      setError(err.response?.data?.message ?? 'Неверный логин или пароль')
     } finally {
       setLoading(false)
     }

@@ -3,13 +3,33 @@ spring:
     vault:
       enabled: false
 
+  datasource:
+    url: jdbc:h2:mem:ai_db;DB_CLOSE_DELAY=-1;INIT=CREATE SCHEMA IF NOT EXISTS AI;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: true
+    properties:
+      hibernate:
+        default_schema: ai
+
+  liquibase:
+    enabled: true
+    default-schema: ai
+    liquibase-schema: public
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
   autoconfigure:
     exclude:
-      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
-      - org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration
-      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
-      - org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration
-      - org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfiguration
       - org.springframework.boot.autoconfigure.kafka.KafkaAutoConfiguration
       - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
       - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
@@ -21,3 +41,4 @@ spring:
 logging:
   level:
     ru.kfu.hub: DEBUG
+    liquibase: INFO
